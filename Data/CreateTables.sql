@@ -132,6 +132,7 @@ Create Table DefenderStats (
     TotalTackles DECIMAL(5,1) NULL,
     Sacks DECIMAL(4,1) NULL,
     Interceptions INT NULL,
+    PassBreakups INT NULL,
     ForcedFumbles INT NULL,
     FumbleRecoveries INT NULL,
     PassesDefended INT NULL,
@@ -173,7 +174,7 @@ Create Table PunterStats (
     Punts INT NULL,
     PuntYards INT NULL,
     LongestPunt INT NULL,
-    PuntsInside20 INT NULL,
+    YardsPerPunt DECIMAL(3,1) NULL,
     constraint PK_PunterStats PRIMARY KEY (PlayerID, RosterID),
     constraint FK_PunterStats_PlayerStats FOREIGN KEY (PlayerID, RosterID)
     REFERENCES PlayerStats(PlayerID, RosterID)
