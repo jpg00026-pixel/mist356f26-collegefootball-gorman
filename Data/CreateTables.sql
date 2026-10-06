@@ -8,30 +8,20 @@ FOR LOGIN NandaSurendra;
 
 ALTER ROLE db_owner ADD MEMBER NandaSurendra;
 */
-if object_id('dbo.QBStats', 'U') is not null
-    drop table dbo.QBStats;
-if object_id('dbo.RBStats', 'U') is not null
-    drop table dbo.RBStats;
-if object_id('dbo.DefenderStats', 'U') is not null
-    drop table dbo.DefenderStats;
-if object_id('dbo.ReturnerStats', 'U') is not null
-    drop table dbo.ReturnerStats;
-if object_id('dbo.KickerStats', 'U') is not null
-    drop table dbo.KickerStats;
-if object_id('dbo.PunterStats', 'U') is not null
-    drop table dbo.PunterStats;
-if object_id('dbo.PlayerStats', 'U') is not null
-    drop table dbo.PlayerStats;
-if object_id('dbo.Player', 'U') is not null
-    drop table dbo.Player;
-if object_id('dbo.Roster', 'U') is not null
-    drop table dbo.Roster;
-if object_id('dbo.Game', 'U') is not null
-    drop table dbo.Game;
-if object_id('dbo.Stadium', 'U') is not null
-    drop table dbo.Stadium;
-if object_id('dbo.Team', 'U') is not null
-    drop table dbo.Team;
+if object_id('Team', 'U') is not null drop table Team;
+if object_id('Stadium', 'U') is not null drop table Stadium;    
+if object_id('Game', 'U') is not null drop table Game;
+if object_id('AppUser', 'U') is not null drop table AppUser;
+if object_id('Roster', 'U') is not null drop table Roster;
+if object_id('Player', 'U') is not null drop table Player;
+if object_id('PlayerStats', 'U') is not null drop table PlayerStats;
+if object_id('QBStats', 'U') is not null drop table QBStats;
+if object_id('RBStats', 'U') is not null drop table RBStats;
+if object_id('DefenderStats', 'U') is not null drop table DefenderStats;
+if object_id('KickerStats', 'U') is not null drop table KickerStats;
+if object_id('PunterStats', 'U') is not null drop table PunterStats
+if object_id('ReturnerStats', 'U') is not null drop table ReturnerStats;
+go
 
 Create Table Team (
     TeamID INT NOT NULL IDENTITY(1,1),
