@@ -8,6 +8,10 @@ FOR LOGIN NandaSurendra;
 
 ALTER ROLE db_owner ADD MEMBER NandaSurendra;
 */
+if object_id('CoachRoster', 'U') is not null drop table CoachRoster;
+if object_id('WeeklyPredictionResults', 'U') is not null drop table WeeklyPredictionResults;
+if object_id('GamePrediction', 'U') is not null drop table GamePrediction;
+if object_id('Coach', 'U') is not null drop table Coach;
 if object_id('ReturnerStats', 'U') is not null drop table ReturnerStats;
 if object_id('PunterStats', 'U') is not null drop table PunterStats;
 if object_id('KickerStats', 'U') is not null drop table KickerStats;
@@ -65,9 +69,9 @@ CREATE table Game (
 );
 go
 
-Create Table Roster (
+Create Table Roster(
     RosterID INT NOT NULL IDENTITY(1,1),
-    Year INT NOT NULL,
+    RosterYear INT NOT NULL,
     TeamID INT NOT NULL,
     constraint PK_Roster PRIMARY KEY (RosterID),
     constraint UQ_Roster_Team_Year UNIQUE (TeamID, Year),
@@ -76,25 +80,37 @@ Create Table Roster (
 go
 
 Create Table Player(
-    PlayerID INT NOT NULL IDENTITY(1,1),
-    PlayerFirstName VARCHAR(50) NOT NULL,
-    PlayerLastName VARCHAR(50) NOT NULL,
+    PlayerID INT IDENTITY(1,1) NOT NULL,
+    PlayerName VARCHAR(50) NOT NULL,
     PlayerDOB DATE NOT NULL,
-    constraint PK_Player PRIMARY KEY (PlayerID)
+    constraint PK_Player PRIMARY KEY (PlayerID),
+    constraint UQ_PlayerName UNIQUE (PlayerName, PlayerDOB)
 );
 go
 
+Create table Position (
+    PositionID INT NOT NULL IDENTITY(1,1),
+    PositionName CHAR(50) NOT NULL,
+    constraint PK_Position PRIMARY KEY (PositionID),
+    constraint UQ_Position UNIQUE (PositionName),
+    constraint CK_PositionName CHECK (PositionName IN ('QB', 'RB', 'WR', 'TE', 'OL', 'DL', 'LB', 'CB', 'S', 'K', 'P', 'KR', 'PR'));
+
+
+)
+
 Create Table PlayerStats (
+    PlayerStatsID INT NOT NULL IDENTITY(1,1),
     PlayerID INT NOT NULL,
     RosterID INT NOT NULL,
-    constraint PK_PlayerStats PRIMARY KEY (PlayerID, RosterID),
-    constraint FK_PlayerStats_Player FOREIGN KEY (PlayerID) REFERENCES Player(PlayerID),
-    constraint FK_PlayerStats_Roster FOREIGN KEY (RosterID) REFERENCES Roster(RosterID)
+    foreign key (PlayerID) references Player(PlayerID),
+    foreign key (RosterID) references Roster(RosterID),
+    constraint PK_PlayerStats PRIMARY KEY (PlayerStatsID),
+    constraint PK_PlayerStats UNIQUE (PlayerID, RosterID),
 );
 go
 
 Create Table QBStats (
-    PlayerID INT NOT NULL,
+    QBStatsID INT NOT NULL,
     RosterID INT NOT NULL,
     PassingCompletions INT NULL,
     PassingAttempts INT NULL,
@@ -102,14 +118,13 @@ Create Table QBStats (
     PassingTouchdowns INT NULL,
     Interceptions INT NULL,
     SacksTaken INT NULL,
-    constraint PK_QBStats PRIMARY KEY (PlayerID, RosterID),
-    constraint FK_QBStats_PlayerStats FOREIGN KEY (PlayerID, RosterID)
-        REFERENCES PlayerStats(PlayerID, RosterID)
-);
+    constraint PK_QBStats PRIMARY KEY (QBStatsID),
+    constraint FK_QBStats_PlayerStats FOREIGN KEY (PlayerStatsID);
+    --REFERENCES PlayerStats(PlayerStatsID)
 go
 
 Create Table RBStats (
-    PlayerID INT NOT NULL,
+    RBStatsID INT NOT NULL,
     RosterID INT NOT NULL,
     RushingAttempts INT NULL,
     RushingYards INT NULL,
@@ -118,14 +133,14 @@ Create Table RBStats (
     ReceivingYards INT NULL,
     ReceivingTouchdowns INT NULL,
     Fumbles INT NULL,
-    constraint PK_RBStats PRIMARY KEY (PlayerID, RosterID),
-    constraint FK_RBStats_PlayerStats FOREIGN KEY (PlayerID, RosterID)
-    REFERENCES PlayerStats(PlayerID, RosterID)
+    constraint PK_RBStats PRIMARY KEY (RBStatsID),
+    constraint FK_RBStats_PlayerStats FOREIGN KEY (RBStatsID) 
+    --REFERENCES PlayerStats(PlayerStatsID)
 );
 go
 
 Create Table DefenderStats (
-    PlayerID INT NOT NULL,
+    DefenderStatsID INT NOT NULL,
     RosterID INT NOT NULL,
     TotalTackles DECIMAL(5,1) NULL,
     Sacks DECIMAL(4,1) NULL,
@@ -135,14 +150,14 @@ Create Table DefenderStats (
     FumbleRecoveries INT NULL,
     PassesDefended INT NULL,
     DefensiveTouchdowns INT NULL,
-    constraint PK_DefenderStats PRIMARY KEY (PlayerID, RosterID),
-    constraint FK_DefenderStats_PlayerStats FOREIGN KEY (PlayerID, RosterID)
-    REFERENCES PlayerStats(PlayerID, RosterID)
+    constraint PK_DefenderStats PRIMARY KEY (DefenderStatsID),
+    constraint FK_DefenderStats_PlayerStats FOREIGN KEY (DefenderStatsID) 
+    --REFERENCES PlayerStats(PlayerStatsID)
 );
 go
 
 Create Table ReturnerStats (
-    PlayerID INT NOT NULL,
+    ReturnerStatsID INT NOT NULL,
     RosterID INT NOT NULL,
     KickReturns INT NULL,
     KickReturnYards INT NULL,
@@ -150,34 +165,74 @@ Create Table ReturnerStats (
     PuntReturns INT NULL,
     PuntReturnYards INT NULL,
     PuntReturnTouchdowns INT NULL,
-    constraint PK_ReturnerStats PRIMARY KEY (PlayerID, RosterID),
-    constraint FK_ReturnerStats_PlayerStats FOREIGN KEY (PlayerID, RosterID)
-    REFERENCES PlayerStats(PlayerID, RosterID)
+    constraint PK_ReturnerStats PRIMARY KEY (ReturnerStatsID),
+    constraint FK_ReturnerStats_PlayerStats FOREIGN KEY (ReturnerStatsID) 
+    --REFERENCES PlayerStats(PlayerStatsID)
 );
 go
 
 Create Table KickerStats (
-    PlayerID INT NOT NULL,
+    KickerStatsID INT NOT NULL,
     RosterID INT NOT NULL,
     FieldGoalsMade INT NULL,
     FieldGoalsAttempted INT NULL,
     ExtraPointsMade INT NULL,
     ExtraPointsAttempted INT NULL,
-    constraint PK_KickerStats PRIMARY KEY (PlayerID, RosterID),
-    constraint FK_KickerStats_PlayerStats FOREIGN KEY (PlayerID, RosterID)
-    REFERENCES PlayerStats(PlayerID, RosterID)
+    constraint PK_KickerStats PRIMARY KEY (KickerStatsID),
+    constraint FK_KickerStats_PlayerStats FOREIGN KEY (KickerStatsID) 
+    --REFERENCES PlayerStats(PlayerStatsID)
 );
 go
 
 Create Table PunterStats (
-    PlayerID INT NOT NULL,
+    PunterStatsID INT NOT NULL,
     RosterID INT NOT NULL,
     Punts INT NULL,
     PuntYards INT NULL,
     LongestPunt INT NULL,
     YardsPerPunt DECIMAL(3,1) NULL,
-    constraint PK_PunterStats PRIMARY KEY (PlayerID, RosterID),
-    constraint FK_PunterStats_PlayerStats FOREIGN KEY (PlayerID, RosterID)
-    REFERENCES PlayerStats(PlayerID, RosterID)
+    constraint PK_PunterStats PRIMARY KEY (PunterStatsID),
+    constraint FK_PunterStats_PlayerStats FOREIGN KEY (PunterStatsID) 
+    --REFERENCES PlayerStats(PlayerStatsID)
 );
 go
+
+Create Table AppUser (
+    AppUserID INT NOT NULL IDENTITY(1,1),
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    Email VARCHAR(255) NOT NULL,
+    Password VARCHAR(255) NOT NULL,
+    constraint PK_AppUser PRIMARY KEY (AppUserID),
+    constraint UQ_AppUser_Email UNIQUE (Email)
+);
+go
+
+Create Table Coach (
+    CoachID INT NOT NULL IDENTITY(1,1),
+    CoachName VARCHAR(100) NOT NULL,
+    constraint PK_Coach PRIMARY KEY (CoachID)
+);
+go
+
+Create Table GamePrediction (
+    GamePredictionID INT NOT NULL IDENTITY(1,1),
+    PredictionDateTime DATETIME2 NOT NULL,
+    AppUserID INT NOT NULL,
+    GameID INT NOT NULL,
+    constraint PK_GamePrediction PRIMARY KEY (GamePredictionID),
+    constraint FK_GamePrediction_AppUser FOREIGN KEY (AppUserID) REFERENCES AppUser(AppUserID),
+    constraint FK_GamePrediction_Game FOREIGN KEY (GameID) REFERENCES Game(GameID)
+);
+go
+
+Create Table WeeklyPredictionResults (
+    WPRID INT NOT NULL IDENTITY(1,1),
+    StartDate DATE NOT NULL,
+    NumberOfCorrectPredictions INT NOT NULL,
+    AppUserID INT NOT NULL,
+    constraint PK_WeeklyPredictionResults PRIMARY KEY (WPRID),
+    constraint FK_WeeklyPredictionResults_AppUser FOREIGN KEY (AppUserID) REFERENCES AppUser(AppUserID)
+);
+go
+
